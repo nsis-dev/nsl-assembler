@@ -42,10 +42,6 @@ jobs:
 
   e2e:
     name: Assemble and compile the e2e corpus
-    # macOS rather than Ubuntu for one reason: Homebrew is preinstalled and
-    # carries current NSIS versions, where Debian's packages lag. Bootstrapping
-    # Homebrew on Ubuntu would get the same makensis but spends a minute or two
-    # on setup first.
     runs-on: macos-latest
 
     steps:
@@ -62,13 +58,14 @@ jobs:
       uses: gradle/actions/setup-gradle@v5
 
     # makensis is the oracle the corpus asserts against; without it run.sh skips.
-    # Homebrew tracks the current release rather than pinning one, so record the
+    # `latest` tracks the current release rather than pinning one, so record the
     # version: a red run caused by an NSIS upgrade should be distinguishable
     # from one caused by a change here.
     - name: Install NSIS
-      run: |
-        brew install makensis
-        makensis -VERSION
+      uses: nsis-dev/setup-nsis@v1
+
+    - name: Print NSIS version
+      run: makensis -VERSION
 
     # One JDK only: the assembled .nsi does not vary by toolchain, so running
     # the corpus across the matrix would just spend CI minutes on makensis.
